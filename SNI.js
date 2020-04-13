@@ -16,9 +16,9 @@ function getSecureContext (CRTname) {
 }
 
 function findSSLID (domain) {
-    for(let i = 0; i < proxies.length; i++) {
-        for (let j = 0; j < proxies.from.length; j++) {
-            if (matcher.isMatch(domain, proxies.from[j])) {
+    for (let i = 0; i < proxies.length; i++) {
+        for (let j = 0; j < proxies[i].from.length; j++) {
+            if (matcher.isMatch(domain, proxies[i].from[j])) {
                 return getSecureContext(proxies[i].ssl);
             }
         }
