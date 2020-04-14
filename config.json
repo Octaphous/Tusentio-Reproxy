@@ -1,5 +1,7 @@
 {
-    "http_port": 80,
-    "enable_https": false,
-    "https_port": 443
+    "port": 80,
+    "https": {
+        "enabled": false,
+        "port": 443
+    }
 }

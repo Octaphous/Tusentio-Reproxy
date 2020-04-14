@@ -21,7 +21,7 @@ const httpsOptions = require("./SNI");
 
 let server;
 
-if (config.enable_https) {
+if (config.https.enabled) {
 
     // Create HTTPS server if HTTPS is enabled in config
     server = https.createServer(httpsOptions, expressServer);
@@ -32,7 +32,7 @@ if (config.enable_https) {
         res.redirect("https://" + req.headers.host + req.url);
         next();
     });
-    redirectServer.listen(config.http_port, () => {
+    redirectServer.listen(config.port, () => {
         console.log("Redirecting all HTTP requests to HTTPS");
     });
 
@@ -42,6 +42,6 @@ if (config.enable_https) {
     server = http.createServer(expressServer);
 }
 
-server.listen(config.enable_https ? config.https_port : config.http_port, () => {
-    console.log("Main server is running. HTTPS: " + config.enable_https);
+server.listen(config.https.enabled ? config.https.port : config.port, () => {
+    console.log("Main server is running. HTTPS: " + config.https.enabled);
 })
