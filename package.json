@@ -1,21 +1,21 @@
 {
-  "name": "reproxy10",
+  "name": "vtio-proxy",
   "version": "1.0.0",
   "description": "Reverse proxy",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pappkasse/Reproxy10.git"
+    "url": "git+https://github.com/Octaphous/VTIO-Proxy"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/pappkasse/Reproxy10/issues"
+    "url": "https://github.com/Octaphous/VTIO-Proxy/issues"
   },
-  "homepage": "https://github.com/pappkasse/Reproxy10#readme",
+  "homepage": "https://github.com/Octaphous/VTIO-Proxy#readme",
   "dependencies": {
     "express": "^4.17.1",
     "http-proxy": "^1.17.0",

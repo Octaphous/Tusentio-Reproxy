@@ -10,6 +10,9 @@ const expressServer = express();
 const logger = require("./logger");
 expressServer.use(logger);
 
+// Add public directory
+expressServer.use(express.static("public"));
+
 // Add proxy handler
 const handler = require("./handler");
 expressServer.use(handler);
