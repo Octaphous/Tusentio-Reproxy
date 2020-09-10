@@ -18,7 +18,7 @@
   "homepage": "https://github.com/Octaphous/VTIO-Proxy#readme",
   "dependencies": {
     "express": "^4.17.1",
-    "http-proxy": "^1.17.0",
+    "http-proxy": "^1.18.1",
     "matcher": "^2.0.0"
   }
 }
