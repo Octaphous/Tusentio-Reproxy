@@ -3,5 +3,7 @@
     "https": {
         "enabled": false,
         "port": 443
-    }
+    },
+    "sslCerts": "ssl",
+    "static": ["/etc/www", "public"]
 }

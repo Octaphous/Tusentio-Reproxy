@@ -10,8 +10,10 @@ const expressServer = express();
 const logger = require("./logger");
 expressServer.use(logger);
 
-// Add public directory
-expressServer.use(express.static("public"));
+// Static dirs
+config.static.forEach((dir) => {
+    expressServer.use(express.static(dir));
+});
 
 // Add proxy handler
 const handler = require("./handler");
@@ -22,7 +24,6 @@ const httpsOptions = require("./SNI");
 let server;
 
 if (config.https.enabled) {
-
     // Create HTTPS server if HTTPS is enabled in config
     server = https.createServer(httpsOptions, expressServer);
 
@@ -35,13 +36,11 @@ if (config.https.enabled) {
     redirectServer.listen(config.port, () => {
         console.log("Redirecting all HTTP requests to HTTPS");
     });
-
 } else {
-
     // Create HTTP server if HTTPS is disabled in config
     server = http.createServer(expressServer);
 }
 
 server.listen(config.https.enabled ? config.https.port : config.port, () => {
     console.log("Main server is running. HTTPS: " + config.https.enabled);
-})
+});
