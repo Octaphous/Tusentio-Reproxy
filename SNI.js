@@ -5,10 +5,12 @@ const matcher = require("matcher");
 const proxies = require("./proxy");
 const config = require("./config");
 
+const sslDir = path.resolve(config.sslCerts);
+
 function getSecureContext(CRTname) {
-    let keyPath = `${path.resolve(config.sslCerts)}/${CRTname}.key`,
-        crtPath = `${path.resolve(config.sslCerts)}/${CRTname}.crt`,
-        caPath = `${path.resolve(config.sslCerts)}/${CRTname}.ca`;
+    let keyPath = `${sslDir}/${CRTname}.key`,
+        crtPath = `${sslDir}/${CRTname}.crt`,
+        caPath = `${sslDir}/${CRTname}.ca`;
 
     return tls.createSecureContext({
         key: fs.existsSync(keyPath) ? fs.readFileSync(keyPath) : undefined,
@@ -31,14 +33,14 @@ let httpsOptions = {
     SNICallback: function (domain, cb) {
         return cb(null, findSSLID(domain));
     },
-    key: fs.existsSync(`./ssl/default.key`)
-        ? fs.readFileSync(`./ssl/default.key`)
+    key: fs.existsSync(`${sslDir}/default.key`)
+        ? fs.readFileSync(`${sslDir}/default.key`)
         : undefined,
-    cert: fs.existsSync(`./ssl/default.crt`)
-        ? fs.readFileSync(`./ssl/default.crt`)
+    cert: fs.existsSync(`${sslDir}/default.crt`)
+        ? fs.readFileSync(`${sslDir}/default.crt`)
         : undefined,
-    ca: fs.existsSync(`./ssl/default.ca`)
-        ? fs.readFileSync(`./ssl/default.ca`)
+    ca: fs.existsSync(`${sslDir}/default.ca`)
+        ? fs.readFileSync(`${sslDir}/default.ca`)
         : undefined,
 };
 
