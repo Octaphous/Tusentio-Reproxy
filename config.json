@@ -4,6 +4,11 @@
         "enabled": false,
         "port": 443
     },
-    "sslCerts": "ssl",
+    "ssl": {
+        "dir": "ssl",
+        "pubKeyName": "cert.pem",
+        "privKeyName": "privkey.pem",
+        "caBundleName": "fullchain.pem"
+    },
     "static": ["/etc/www", "public"]
 }
