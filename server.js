@@ -33,7 +33,7 @@ if (config.https.enabled) {
         res.redirect("https://" + req.headers.host + req.url);
         next();
     });
-    redirectServer.listen(config.port, () => {
+    redirectServer.listen(process.env.PORT, () => {
         console.log("Redirecting all HTTP requests to HTTPS");
     });
 } else {
@@ -41,6 +41,9 @@ if (config.https.enabled) {
     server = http.createServer(expressServer);
 }
 
-server.listen(config.https.enabled ? config.https.port : config.port, () => {
-    console.log("Main server is running. HTTPS: " + config.https.enabled);
-});
+server.listen(
+    config.https.enabled ? process.env.HTTPS_PORT : process.env.PORT,
+    () => {
+        console.log("Main server is running. HTTPS: " + config.https.enabled);
+    }
+);

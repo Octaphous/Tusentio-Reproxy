@@ -1,8 +1,6 @@
 {
-    "port": 80,
     "https": {
-        "enabled": false,
-        "port": 443
+        "enabled": false
     },
     "ssl": {
         "dir": "ssl",
