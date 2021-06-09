@@ -7,6 +7,19 @@ const config = require("./config");
 
 const sslDir = path.resolve(config.ssl.dir);
 
+const defPubKey = `${sslDir}/${config.ssl.pubKeyName}`;
+const defPrivKey = `${sslDir}/${config.ssl.privKeyName}`;
+const defCaBundle = `${sslDir}/${config.ssl.caBundleName}`;
+
+let httpsOptions = {
+    SNICallback: function (domain, cb) {
+        return cb(null, findSSLID(domain));
+    },
+    cert: fs.existsSync(defPubKey) ? fs.readFileSync(defPubKey) : undefined,
+    key: fs.existsSync(defPrivKey) ? fs.readFileSync(defPrivKey) : undefined,
+    ca: fs.existsSync(defCaBundle) ? fs.readFileSync(defCaBundle) : undefined,
+};
+
 function getSecureContext(domain) {
     let crtPath = `${sslDir}/${domain}/${config.ssl.pubKeyName}`,
         keyPath = `${sslDir}/${domain}/${config.ssl.privKeyName}`,
@@ -28,20 +41,5 @@ function findSSLID(domain) {
         }
     }
 }
-
-let httpsOptions = {
-    SNICallback: function (domain, cb) {
-        return cb(null, findSSLID(domain));
-    },
-    cert: fs.existsSync(`${sslDir}/${config.ssl.pubKeyName}`)
-        ? fs.readFileSync(`${sslDir}/${config.ssl.pubKeyName}`)
-        : undefined,
-    key: fs.existsSync(`${sslDir}/${config.ssl.privKeyName}`)
-        ? fs.readFileSync(`${sslDir}/${config.ssl.privKeyName}`)
-        : undefined,
-    ca: fs.existsSync(`${sslDir}/${config.ssl.caBundleName}`)
-        ? fs.readFileSync(`${sslDir}/${config.ssl.caBundleName}`)
-        : undefined,
-};
 
 module.exports = httpsOptions;
