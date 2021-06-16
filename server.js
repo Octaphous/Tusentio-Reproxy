@@ -1,14 +1,31 @@
+require("dotenv").config();
 const express = require("express");
 const https = require("https");
 const http = require("http");
-
+const morgan = require("morgan");
+const fs = require("fs");
+const path = require("path");
 const config = require("./config.json");
 
 const expressServer = express();
 
-// Add request logging middleware
-const logger = require("./logger");
-expressServer.use(logger);
+// Log all errors
+expressServer.use(
+    morgan("dev", {
+        skip: function (req, res) {
+            return res.statusCode < 400;
+        },
+    })
+);
+
+// Store ALL logs
+expressServer.use(
+    morgan("common", {
+        stream: fs.createWriteStream(path.join(__dirname, "access.log"), {
+            flags: "a",
+        }),
+    })
+);
 
 // Static dirs
 config.static.forEach((dir) => {
@@ -41,9 +58,12 @@ if (config.https.enabled) {
     server = http.createServer(expressServer);
 }
 
-server.listen(
-    config.https.enabled ? process.env.HTTPS_PORT : process.env.PORT,
-    () => {
-        console.log("Main server is running. HTTPS: " + config.https.enabled);
-    }
-);
+const port = config.https.enabled ? process.env.HTTPS_PORT : process.env.PORT;
+
+server.listen(port, () => {
+    console.log(
+        `Reproxy is running.\nHTTP: ${process.env.PORT}\nHTTPS: ${
+            config.https.enabled ? process.env.HTTPS_PORT : "disabled"
+        }`
+    );
+});
