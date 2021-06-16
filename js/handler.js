@@ -85,8 +85,3 @@ proxyServer.on("proxyRes", function (proxyRes, req, res) {
         res.end(Buffer.concat(body));
     });
 });
-
-function sendErrorPage(res, pageName) {
-    const statusPage = path.join(__dirname, `../errors/${pageName}.html`);
-    if (fs.existsSync(statusPage)) res.sendFile(statusPage);
-}
