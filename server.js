@@ -21,7 +21,7 @@ expressServer.use(
 // Store ALL logs
 expressServer.use(
     morgan("common", {
-        stream: fs.createWriteStream(path.join(__dirname, "access.log"), {
+        stream: fs.createWriteStream(path.join(__dirname, "logs/access.log"), {
             flags: "a",
         }),
     })
@@ -33,10 +33,10 @@ config.static.forEach((dir) => {
 });
 
 // Add proxy handler
-const handler = require("./handler");
+const handler = require("./js/handler");
 expressServer.use(handler);
 
-const httpsOptions = require("./SNI");
+const httpsOptions = require("./js/SNI");
 
 let server;
 
