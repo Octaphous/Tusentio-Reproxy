@@ -6,14 +6,14 @@ const proxies = require("../config.json").proxies;
 // Create proxy server
 const proxyServer = httpProxy.createProxyServer();
 
-module.exports = function (req, res) {
+module.exports = function (req, res, next) {
     // Loop through each element in proxies-array
-    proxies.forEach((proxy) => {
+    for (proxy of proxies) {
         // Loop through each "from" property in the current element
-        proxy.from.forEach((url) => {
+        for (url of proxy.from) {
             // Proxy the request if the request hostname matches any of the values in "from"
             if (matcher.isMatch(req.hostname, url)) {
-                proxyServer.web(
+                return proxyServer.web(
                     req,
                     res,
                     {
@@ -34,8 +34,10 @@ module.exports = function (req, res) {
                     }
                 );
             }
-        });
-    });
+        }
+    }
+
+    next();
 };
 
 // Self handle proxy response to check status codes
@@ -44,6 +46,7 @@ proxyServer.on("proxyRes", function (proxyRes, req, res) {
     res.set(proxyRes.headers);
     res.status(proxyRes.statusCode);
     res.removeHeader("X-Powered-By");
+    res.removeHeader("content-security-policy");
 
     // Build response from proxy
     const body = [];

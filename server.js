@@ -40,6 +40,16 @@ config.static.forEach((dir) => {
 const handler = require("./js/handler");
 expressServer.use(handler);
 
+/* If no proxy was configured for this url, show a 404-page */
+expressServer.use((req, res, next) => {
+    res.status(404);
+    res.render("error", {
+        status: res.statusCode,
+        title: "Service Doesn't Exist.",
+        message: "We can't seem to find the service you're looking for.",
+    });
+});
+
 const httpsOptions = require("./js/SNI");
 
 let server;
