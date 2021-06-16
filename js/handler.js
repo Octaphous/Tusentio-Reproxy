@@ -1,7 +1,5 @@
 const httpProxy = require("http-proxy");
 const matcher = require("matcher");
-const fs = require("fs");
-const path = require("path");
 
 const proxies = require("../config.json").proxies;
 
