@@ -2,8 +2,8 @@ const tls = require("tls");
 const fs = require("fs");
 const path = require("path");
 const matcher = require("matcher");
-const proxies = require("./proxy");
-const sslConf = require("./config").ssl;
+const proxies = require("./config.json").proxies;
+const sslConf = require("./config.json").ssl;
 
 // Directory containing ssl certificates
 const sslDir = path.resolve(sslConf.dir);
