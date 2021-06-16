@@ -9,6 +9,10 @@ const config = require("./config.json");
 
 const expressServer = express();
 
+// EJS
+expressServer.set("view engine", "ejs");
+expressServer.set("views", path.join(__dirname, "/views"));
+
 // Log all errors
 expressServer.use(
     morgan("dev", {

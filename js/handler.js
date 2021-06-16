@@ -27,7 +27,12 @@ module.exports = function (req, res) {
                     (e) => {
                         console.error("Could not proxy: " + e.code);
                         res.status(503);
-                        sendErrorPage(res, "ProxyUnavailable");
+                        res.render("error", {
+                            status: res.statusCode,
+                            title: "Service Unavailable.",
+                            message:
+                                "The server is temporarily unable to handle your request due to maintenance. Please try again later.",
+                        });
                     }
                 );
             }
@@ -52,7 +57,29 @@ proxyServer.on("proxyRes", function (proxyRes, req, res) {
 
         // If response contains "Cannot Get/Post/Put", respond with 404 Not Found
         if (exp404MSG.test(body.toString()) && proxyRes.statusCode === 404)
-            return sendErrorPage(res, "NotFound");
+            return res.render("error", {
+                status: res.statusCode,
+                title: "Not Found.",
+                message:
+                    "The page you were looking for could not be found. It might have been removed.",
+            });
+        // If proxy response is JSON, parse and check if it contains a service error.
+        else if (res.get("content-type").startsWith("application/json")) {
+            try {
+                let data = JSON.parse(body);
+                if (
+                    data["service-error-title"] &&
+                    data["service-error-message"]
+                ) {
+                    res.set("content-type", "text/html");
+                    return res.render("error", {
+                        status: res.statusCode,
+                        title: data["service-error-title"],
+                        message: data["service-error-message"],
+                    });
+                }
+            } catch (e) {}
+        }
 
         // Send response
         res.end(Buffer.concat(body));
