@@ -53,6 +53,9 @@ proxyServer.on("proxyRes", function (proxyRes, req, res) {
 
     // Handle response to client
     proxyRes.on("end", function () {
+        // If status code is 304, the response is empty
+        if (proxyRes.statusCode == 304) return res.end();
+
         let exp404MSG = /<pre>Cannot ([^\s]+) \/([^\s]+)?<\/pre>/;
 
         // If response contains "Cannot Get/Post/Put", respond with 404 Not Found
