@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;600&display=swap" rel="stylesheet">
 
+    <link rel="apple-touch-icon" sizes="180x180" href="https://static.tusent.io/common/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://static.tusent.io/common/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://static.tusent.io/common/favicon/favicon-16x16.png">
+
     <title><%= title %> - Tusentio</title>
 
     <style>
@@ -27,23 +31,30 @@
         }
 
         body {
-            background: #ff2c6d;
-            padding: 20vh 5vw;
+            background: #eac52d;
+            padding: 15vh 7.5vw;
+        }
+
+        img {
+            width: 10rem;
         }
 
         h1 {
-            margin-bottom: 0.75rem;
-            font-size: 2.25rem;
+            margin-top: 4rem;
+            margin-bottom: 1rem;
+            font-size: 4rem;
+            line-height: 4rem;
         }
 
         p {
-            font-size: 1.25rem;
+            font-size: 1.5rem;
         }
 
     </style>
 </head>
 <body>
-    <h1><%= status %> - <%= title %></h1>
+    <img src="https://static.tusent.io/common/svg/logo-symbol-dark.svg" alt="Tusentio Logo">
+    <h1><%= status %> - <%= title %> :(</h1>
     <p><%= message %></p>
 </body>
 </html>
