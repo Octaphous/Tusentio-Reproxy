@@ -1,4 +1,3 @@
 .env
 config.json
-access.log
 /node_modules
