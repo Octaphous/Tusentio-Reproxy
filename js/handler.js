@@ -23,11 +23,11 @@ module.exports = function (req, res, next) {
 
         // Proxy the request if the request URL matches with any of the values in "from"
         if (matchedRoute) {
-            // Amputate the matched path from the request
-            req.path = req.path.replace(matchedRoute.path, "");
+            // Amputate the matched path from the request url
+            req.url = req.url.replace(matchedRoute.path, "");
 
-            if (!req.path.startsWith("/")) {
-                req.path = "/" + req.path;
+            if (!req.url.startsWith("/")) {
+                req.url = "/" + req.url;
             }
 
             return proxyServer.web(
