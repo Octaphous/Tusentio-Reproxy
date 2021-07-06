@@ -11,8 +11,21 @@
     },
     "proxies": [
         {
+            "from": "192.168.2.*",
+            "to": "http://127.0.0.1:8080",
+            "sslDomain": "x"
+        },
+        {
             "from": ["127.0.0.1", "192.168.1.*"],
-            "to": ["http://127.0.0.1:8080"],
+            "to": ["http://127.0.0.1:8081", "http://127.0.0.1:8082"],
+            "sslDomain": "x"
+        },
+        {
+            "from": {
+                "hostname": "www.tusent.io",
+                "path": "/somepath"
+            },
+            "to": "http://127.0.0.1:8083",
             "sslDomain": "x"
         }
     ]

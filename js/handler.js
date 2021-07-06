@@ -1,39 +1,53 @@
 const httpProxy = require("http-proxy");
-const matcher = require("matcher");
+const Matcher = require("matcher");
 
 const proxies = require("../config.json").proxies;
+
+for (proxy of proxies) {
+    if (!Array.isArray(proxy.from)) {
+        proxy.from = [proxy.from];
+    }
+
+    if (!Array.isArray(proxy.to)) {
+        proxy.to = [proxy.to];
+    }
+}
 
 // Create proxy server
 const proxyServer = httpProxy.createProxyServer();
 
 module.exports = function (req, res, next) {
     // Loop through each element in proxies-array
-    for (proxy of proxies) {
-        // Loop through each "from" property in the current element
-        for (url of proxy.from) {
-            // Proxy the request if the request hostname matches any of the values in "from"
-            if (matcher.isMatch(req.hostname, url)) {
-                return proxyServer.web(
-                    req,
-                    res,
-                    {
-                        target: proxy.to[
-                            Math.floor(Math.random() * proxy.to.length)
-                        ],
-                        selfHandleResponse: true,
-                    },
-                    (e) => {
-                        console.error("Could not proxy: " + e.code);
-                        res.status(503);
-                        res.render("error", {
-                            status: res.statusCode,
-                            title: "Service Unavailable.",
-                            message:
-                                "The server is temporarily unable to handle your request due to maintenance. Please try again later.",
-                        });
-                    }
-                );
+    for (const proxy of proxies) {
+        const matchedRoute = matchOneRoute(req, proxy.from);
+
+        // Proxy the request if the request URL matches with any of the values in "from"
+        if (matchedRoute) {
+            // Amputate the matched path from the request
+            req.path = req.path.replace(matchedRoute.path, "");
+
+            if (!req.path.startsWith("/")) {
+                req.path = "/" + req.path;
             }
+
+            return proxyServer.web(
+                req,
+                res,
+                {
+                    target: proxy.to[Math.floor(Math.random() * proxy.to.length)],
+                    selfHandleResponse: true,
+                },
+                (e) => {
+                    console.error("Could not proxy: " + e.code);
+                    res.status(503);
+                    res.render("error", {
+                        status: res.statusCode,
+                        title: "Service Unavailable.",
+                        message:
+                            "The server is temporarily unable to handle your request due to maintenance. Please try again later.",
+                    });
+                }
+            );
         }
     }
 
@@ -71,10 +85,7 @@ proxyServer.on("proxyRes", function (proxyRes, req, res) {
         else if (res.get("content-type").startsWith("application/json")) {
             try {
                 let data = JSON.parse(body);
-                if (
-                    data["service-error-title"] &&
-                    data["service-error-message"]
-                ) {
+                if (data["service-error-title"] && data["service-error-message"]) {
                     res.set("content-type", "text/html");
                     return res.render("error", {
                         status: res.statusCode,
@@ -89,3 +100,57 @@ proxyServer.on("proxyRes", function (proxyRes, req, res) {
         res.end(Buffer.concat(body));
     });
 });
+
+function matchOneRoute(req, routes) {
+    for (let route of routes) {
+        if (typeof route === "string") {
+            route = {
+                hostname: route,
+            };
+        }
+
+        const { hostname: hostnamePattern = "*", path: pathPattern = "/" } = route;
+
+        const matchedHostname = matchHostname(req.hostname, hostnamePattern);
+        if (matchedHostname == null) return undefined;
+
+        const matchedPath = matchPath(req.path, pathPattern);
+        if (matchedPath == null) return undefined;
+
+        return {
+            hostname: matchedHostname,
+            path: matchedPath,
+        };
+    }
+}
+
+function matchPath(inputPath, patternPath) {
+    return "/" + matchParts(inputPath, patternPath, "/");
+}
+
+function matchHostname(inputPath, patternPath) {
+    return matchParts(inputPath, patternPath, ".", true);
+}
+
+function matchParts(input, pattern, separator, reverse = false) {
+    const inputParts = input.split(separator).filter((part) => part.length > 0);
+    const patternParts = pattern.split(separator).filter((part) => part.length > 0);
+    if (patternParts.length > inputParts.length) return undefined;
+
+    if (reverse) {
+        inputParts.reverse();
+        patternParts.reverse();
+    }
+
+    const matchingParts = [];
+
+    for (let i = 0; i < patternParts.length; i++) {
+        const inputPart = inputParts[i];
+        const patternPart = patternParts[i];
+        if (!Matcher.isMatch(inputPart, patternPart)) return undefined;
+
+        matchingParts.push(inputPart);
+    }
+
+    return matchingParts.join(separator);
+}
