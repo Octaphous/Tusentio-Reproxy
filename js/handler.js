@@ -1,5 +1,5 @@
 const httpProxy = require("http-proxy");
-const Matcher = require("matcher");
+const matcher = require("./matcher");
 
 const proxies = require("../config.json").proxies;
 
@@ -111,10 +111,10 @@ function matchOneRoute(req, routes) {
 
         const { hostname: hostnamePattern = "*", path: pathPattern = "/" } = route;
 
-        const matchedHostname = matchHostname(req.hostname, hostnamePattern);
+        const matchedHostname = matcher.matchHostname(req.hostname, hostnamePattern, true);
         if (matchedHostname == null) return undefined;
 
-        const matchedPath = matchPath(req.path, pathPattern);
+        const matchedPath = matcher.matchPath(req.path, pathPattern);
         if (matchedPath == null) return undefined;
 
         return {
@@ -122,35 +122,4 @@ function matchOneRoute(req, routes) {
             path: matchedPath,
         };
     }
-}
-
-function matchPath(inputPath, patternPath) {
-    return "/" + matchParts(inputPath, patternPath, "/");
-}
-
-function matchHostname(inputPath, patternPath) {
-    return matchParts(inputPath, patternPath, ".", true);
-}
-
-function matchParts(input, pattern, separator, reverse = false) {
-    const inputParts = input.split(separator).filter((part) => part.length > 0);
-    const patternParts = pattern.split(separator).filter((part) => part.length > 0);
-    if (patternParts.length > inputParts.length) return undefined;
-
-    if (reverse) {
-        inputParts.reverse();
-        patternParts.reverse();
-    }
-
-    const matchingParts = [];
-
-    for (let i = 0; i < patternParts.length; i++) {
-        const inputPart = inputParts[i];
-        const patternPart = patternParts[i];
-        if (!Matcher.isMatch(inputPart, patternPart)) return undefined;
-
-        matchingParts.push(inputPart);
-    }
-
-    return matchingParts.join(separator);
 }
