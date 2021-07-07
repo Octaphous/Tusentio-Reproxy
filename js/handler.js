@@ -77,15 +77,16 @@ proxyServer.on("proxyRes", function (proxyRes, req, res) {
         let exp404MSG = /<pre>Cannot ([^\s]+) \/([^\s]+)?<\/pre>/;
 
         // If response contains "Cannot Get/Post/Put", respond with 404 Not Found
-        if (exp404MSG.test(body.toString()) && proxyRes.statusCode === 404)
+        if (exp404MSG.test(body.toString()) && proxyRes.statusCode === 404) {
             return res.render("error", {
                 status: res.statusCode,
                 title: "Not Found.",
                 message:
                     "The page you were looking for could not be found. It might have been removed.",
             });
+        }
         // If proxy response is JSON, parse and check if it contains a service error.
-        else if (res.get("content-type").startsWith("application/json")) {
+        else if (req.accepts(["application/json", "*/*"]) === "application/json") {
             try {
                 let data = JSON.parse(body);
                 if (data["service-error-title"] && data["service-error-message"]) {
