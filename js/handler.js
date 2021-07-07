@@ -23,12 +23,15 @@ module.exports = function (req, res, next) {
 
         // Proxy the request if the request URL matches with any of the values in "from"
         if (matchedRoute) {
-            // Amputate the matched path from the request url
-            req.url = req.url.replace(matchedRoute.path, "");
+            // NOTE: Do not meddle with the URL (Causes problems with some middlewares on target servers)
 
-            if (!req.url.startsWith("/")) {
-                req.url = "/" + req.url;
-            }
+            // REMOVED
+            // // Amputate the matched path from the request url
+            // req.url = req.url.replace(matchedRoute.path, "");
+            //
+            // if (!req.url.startsWith("/")) {
+            //     req.url = "/" + req.url;
+            // }
 
             return proxyServer.web(
                 req,
