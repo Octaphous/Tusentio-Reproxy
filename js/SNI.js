@@ -5,6 +5,12 @@ const matcher = require("./matcher");
 const proxies = require("../config.json").proxies;
 const sslConf = require("../config.json").ssl;
 
+for (proxy of proxies) {
+    if (!Array.isArray(proxy.from)) {
+        proxy.from = [proxy.from];
+    }
+}
+
 // Directory containing ssl certificates
 const sslDir = path.resolve(sslConf.dir);
 
@@ -36,13 +42,9 @@ function getSecureContext(domain) {
 
 // Get certificates for the provided domain
 function findSSLID(domain) {
-    for (let i = 0; i < proxies.length; i++) {
-        for (let j = 0; j < proxies[i].from.length; j++) {
-            const route = (proxies[i].from[j] && proxies[i].from[j].hostname) || proxies[i].from[j];
-
-            if (matcher.matchHostname(domain, route, true)) {
-                return getSecureContext(proxies[i].sslDomain);
-            }
+    for (const proxy of proxies) {
+        if (matcher.matchHostname(domain, proxy.from, true) != null) {
+            return getSecureContext(proxy.sslDomain);
         }
     }
 }

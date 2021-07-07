@@ -2,7 +2,7 @@ const Matcher = require("matcher");
 
 /**
  * @param {string} input
- * @param {string} pattern
+ * @param {string[]} patterns
  * @param {string} separator
  *
  * @param {Object} [options]
@@ -10,63 +10,58 @@ const Matcher = require("matcher");
  * @param {boolean} [options.matchLength]
  * @param {boolean} [options.caseSensitive]
  */
-function piecewiseMatch(input, pattern, separator, options = {}) {
+function piecewiseMatch(input, patterns, separator, options = {}) {
     const { reverseOrder = false, matchLength = false, caseSensitive = false } = options;
-
     const inputParts = input.split(separator).filter((part) => part.length > 0);
-    const patternParts = pattern.split(separator).filter((part) => part.length > 0);
-
-    if (patternParts.length > inputParts.length) {
-        return undefined;
-    }
-
-    if (matchLength && patternParts.length !== inputParts.length) {
-        return undefined;
-    }
 
     if (reverseOrder) {
         inputParts.reverse();
-        patternParts.reverse();
     }
 
-    const matchingParts = [];
+    for (const pattern of patterns) {
+        const patternParts = pattern.split(separator).filter((part) => part.length > 0);
 
-    for (let i = 0; i < patternParts.length; i++) {
-        const inputPart = inputParts[i];
-        const patternPart = patternParts[i];
+        if (patternParts.length > inputParts.length) continue;
+        if (matchLength && patternParts.length !== inputParts.length) continue;
 
-        if (!Matcher.isMatch(inputPart, patternPart, { caseSensitive })) {
-            return undefined;
+        if (reverseOrder) {
+            patternParts.reverse();
         }
 
-        matchingParts.push(inputPart);
-    }
+        let matched = true;
+        for (let i = 0; i < patternParts.length; i++) {
+            const inputPart = inputParts[i];
+            const patternPart = patternParts[i];
 
-    return matchingParts.join(separator);
+            if (!Matcher.isMatch(inputPart, patternPart, { caseSensitive })) {
+                matched = false;
+                break;
+            }
+        }
+
+        if (matched) {
+            return pattern;
+        }
+    }
 }
 
 /**
  * @param {string} inputPath
- * @param {string} patternPath
+ * @param {string[]} patternPaths
  */
-function matchPath(inputPath, patternPath) {
-    const matchedPath = piecewiseMatch(inputPath, patternPath, "/", {
+function matchPath(inputPath, patternPaths) {
+    return piecewiseMatch(inputPath, patternPaths, "/", {
         caseSensitive: true,
     });
-
-    if (matchedPath != null) {
-        return "/" + matchedPath;
-    }
 }
 
 /**
- *
- * @param {string} inputPath
- * @param {string} patternPath
+ * @param {string} inputHostname
+ * @param {string[]} patternHostnames
  * @param {boolean} [ignoreSubdomains]
  */
-function matchHostname(inputPath, patternPath, ignoreSubdomains) {
-    return piecewiseMatch(inputPath, patternPath, ".", {
+function matchHostname(inputHostname, patternHostnames, ignoreSubdomains) {
+    return piecewiseMatch(inputHostname, patternHostnames, ".", {
         reverseOrder: true,
         matchLength: !ignoreSubdomains,
     });

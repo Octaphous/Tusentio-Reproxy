@@ -8,8 +8,10 @@ for (proxy of proxies) {
         proxy.from = [proxy.from];
     }
 
-    if (!Array.isArray(proxy.to)) {
-        proxy.to = [proxy.to];
+    if (typeof proxy.to !== "object" || Array.isArray(proxy.to)) {
+        proxy.to = {
+            "/": proxy.to,
+        };
     }
 }
 
@@ -19,25 +21,22 @@ const proxyServer = httpProxy.createProxyServer();
 module.exports = function (req, res, next) {
     // Loop through each element in proxies-array
     for (const proxy of proxies) {
-        const matchedRoute = matchOneRoute(req, proxy.from);
+        // Proxy the request if the request hostname matches with any of the values in "from"
+        if (matcher.matchHostname(req.hostname, proxy.from, true) != null) {
+            // NOTE: Do not meddle with ``req.url`` (Causes problems with some middlewares on target servers)
 
-        // Proxy the request if the request URL matches with any of the values in "from"
-        if (matchedRoute) {
-            // NOTE: Do not meddle with the URL (Causes problems with some middlewares on target servers)
+            const paths = Object.keys(proxy.to);
+            const matchedPath = matcher.matchPath(req.path, paths);
+            if (matchedPath == null) continue;
 
-            // REMOVED
-            // // Amputate the matched path from the request url
-            // req.url = req.url.replace(matchedRoute.path, "");
-            //
-            // if (!req.url.startsWith("/")) {
-            //     req.url = "/" + req.url;
-            // }
+            const match = proxy.to[matchedPath];
+            const targets = Array.isArray(match) ? match : [match];
 
             return proxyServer.web(
                 req,
                 res,
                 {
-                    target: proxy.to[Math.floor(Math.random() * proxy.to.length)],
+                    target: targets[Math.floor(Math.random() * targets.length)],
                     selfHandleResponse: true,
                 },
                 (e) => {
@@ -104,26 +103,3 @@ proxyServer.on("proxyRes", function (proxyRes, req, res) {
         res.end(Buffer.concat(body));
     });
 });
-
-function matchOneRoute(req, routes) {
-    for (let route of routes) {
-        if (typeof route === "string") {
-            route = {
-                hostname: route,
-            };
-        }
-
-        const { hostname: hostnamePattern = "*", path: pathPattern = "/" } = route;
-
-        const matchedHostname = matcher.matchHostname(req.hostname, hostnamePattern, true);
-        if (matchedHostname == null) return undefined;
-
-        const matchedPath = matcher.matchPath(req.path, pathPattern);
-        if (matchedPath == null) return undefined;
-
-        return {
-            hostname: matchedHostname,
-            path: matchedPath,
-        };
-    }
-}

@@ -21,11 +21,11 @@
             "sslDomain": "x"
         },
         {
-            "from": {
-                "hostname": "www.tusent.io",
-                "path": "/somepath"
+            "from": "sso.tusent.io",
+            "to": {
+                "/api": "http://127.0.0.1:8083",
+                "/": ["http://127.0.0.1:8084", "http://127.0.0.1:8085"]
             },
-            "to": "http://127.0.0.1:8083",
             "sslDomain": "x"
         }
     ]
