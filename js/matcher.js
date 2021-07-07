@@ -50,12 +50,13 @@ function piecewiseMatch(input, pattern, separator, options = {}) {
  * @param {string} patternPath
  */
 function matchPath(inputPath, patternPath) {
-    return (
-        "/" +
-        piecewiseMatch(inputPath, patternPath, "/", {
-            caseSensitive: true,
-        })
-    );
+    const matchedPath = piecewiseMatch(inputPath, patternPath, "/", {
+        caseSensitive: true,
+    });
+
+    if (matchedPath != null) {
+        return "/" + matchedPath;
+    }
 }
 
 /**
