@@ -1,21 +1,22 @@
 {
-    "name": "reproxy",
+    "name": "@tusent.io/tusentio-reproxy",
     "version": "1.0.0",
+    "private": true,
     "description": "Reverse proxy",
-    "main": "server.js",
-    "scripts": {
-        "start": "node server"
+    "homepage": "https://github.com/Octaphous/VTIO-Proxy#readme",
+    "bugs": {
+        "url": "https://github.com/Octaphous/VTIO-Proxy/issues"
     },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/Octaphous/Tusentio-Reproxy"
     },
-    "author": "",
-    "license": "ISC",
-    "bugs": {
-        "url": "https://github.com/Octaphous/VTIO-Proxy/issues"
+    "license": "UNLICENSED",
+    "author": "Tusentio <contact@tusent.io> (https://www.tusent.io/)",
+    "main": "server.js",
+    "scripts": {
+        "start": "node ."
     },
-    "homepage": "https://github.com/Octaphous/VTIO-Proxy#readme",
     "dependencies": {
         "dotenv": "^10.0.0",
         "ejs": "^3.1.6",

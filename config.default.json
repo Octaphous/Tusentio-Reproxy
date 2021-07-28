@@ -1,0 +1,47 @@
+{
+    "static": ["public"],
+    "https": {
+        "enabled": true
+    },
+    "ssl": {
+        "dir": "/etc/.dev/tusentio/ssl",
+        "pubKeyName": "cert.pem",
+        "privKeyName": "privkey.pem",
+        "caBundleName": "fullchain.pem"
+    },
+    "proxies": [
+        {
+            "from": "sso.tusent.io",
+            "to": {
+                "/api": "http://127.0.0.1:8081",
+                "/": "http://127.0.0.1:8080"
+            },
+            "sslDomain": "tusent.io"
+        },
+        {
+            "from": "static.tusent.io",
+            "to": "http://127.0.0.1:8082",
+            "sslDomain": "tusent.io"
+        },
+        {
+            "from": "login.tusent.io",
+            "to": "http://127.0.0.1:8083",
+            "sslDomain": "tusent.io"
+        },
+        {
+            "from": "cms.tusent.io",
+            "to": "http://127.0.0.1:8084",
+            "sslDomain": "tusent.io"
+        },
+        {
+            "from": "cloud.tusent.io",
+            "to": "http://127.0.0.1:8085",
+            "sslDomain": "tusent.io"
+        },
+        {
+            "from": "tusent.io",
+            "to": "http://127.0.0.1:8086",
+            "sslDomain": "tusent.io"
+        }
+    ]
+}

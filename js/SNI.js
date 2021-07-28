@@ -1,3 +1,5 @@
+/** @format */
+
 const tls = require("tls");
 const fs = require("fs");
 const path = require("path");
@@ -15,9 +17,9 @@ for (proxy of proxies) {
 const sslDir = path.resolve(sslConf.dir);
 
 // Default cert and key
-const defPubKey = `${sslDir}/${sslConf.pubKeyName}`,
-    defPrivKey = `${sslDir}/${sslConf.privKeyName}`,
-    defCaBundle = `${sslDir}/${sslConf.caBundleName}`;
+const defPubKey = path.join(sslDir, sslConf.pubKeyName),
+    defPrivKey = path.join(sslDir, sslConf.privKeyName),
+    defCaBundle = path.join(sslDir, sslConf.caBundleName);
 
 let httpsOptions = {
     SNICallback: function (domain, cb) {
@@ -28,10 +30,14 @@ let httpsOptions = {
     ca: readIfExists(defCaBundle),
 };
 
+/**
+ * @param {string} domain
+ * @returns {tls.SecureContextOptions}
+ */
 function getSecureContext(domain) {
-    const pubKeyPath = `${sslDir}/${domain}/${sslConf.pubKeyName}`,
-        privKeyPath = `${sslDir}/${domain}/${sslConf.privKeyName}`,
-        caBundlePath = `${sslDir}/${domain}/${sslConf.caBundleName}`;
+    const pubKeyPath = path.join(sslDir, domain, sslConf.pubKeyName),
+        privKeyPath = path.join(sslDir, domain, sslConf.privKeyName),
+        caBundlePath = path.join(sslDir, domain, sslConf.caBundleName);
 
     return tls.createSecureContext({
         cert: readIfExists(pubKeyPath),
@@ -40,17 +46,28 @@ function getSecureContext(domain) {
     }).context;
 }
 
-// Get certificates for the provided domain
+/**
+ * Get certificates for the provided domain.
+ *
+ * @param {string} domain
+ * @returns {tls.SecureContextOptions?}
+ */
 function findSSLID(domain) {
     for (const proxy of proxies) {
         if (matcher.matchHostname(domain, proxy.from, true) != null) {
             return getSecureContext(proxy.sslDomain);
         }
     }
+
+    return null;
 }
 
+/**
+ * @param {fs.PathLike} path
+ * @returns {Buffer?}
+ */
 function readIfExists(path) {
-    return fs.existsSync(path) ? fs.readFileSync(path) : undefined;
+    return fs.existsSync(path) ? fs.readFileSync(path) : null;
 }
 
 module.exports = httpsOptions;
