@@ -4,7 +4,7 @@
         "enabled": true
     },
     "ssl": {
-        "dir": "/etc/.dev/tusentio/ssl",
+        "dir": "/etc/letsencrypt/live",
         "pubKeyName": "cert.pem",
         "privKeyName": "privkey.pem",
         "caBundleName": "fullchain.pem"
