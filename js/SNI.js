@@ -3,7 +3,7 @@
 const tls = require("tls");
 const fs = require("fs");
 const path = require("path");
-const matcher = require("./matcher");
+const utils = require("./utils");
 const proxies = require("../config.json").proxies;
 const sslConf = require("../config.json").ssl;
 
@@ -54,7 +54,10 @@ function getSecureContext(domain) {
  */
 function findSSLID(domain) {
     for (const proxy of proxies) {
-        if (matcher.matchHostname(domain, proxy.from, true) != null) {
+        const hostnames = utils.ensureStrings(proxy.from);
+        const hostnameRegex = new RegExp(`(?<=\\.|^)(${hostnames.map(utils.escapeRegex).join("|")})$`, "iu");
+
+        if (hostnameRegex.test(domain)) {
             return getSecureContext(proxy.sslDomain);
         }
     }

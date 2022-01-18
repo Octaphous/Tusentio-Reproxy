@@ -1,59 +1,85 @@
 const httpProxy = require("http-proxy");
-const matcher = require("./matcher");
-
+const utils = require("./utils");
 const proxies = require("../config.json").proxies;
 
-for (proxy of proxies) {
-    if (!Array.isArray(proxy.from)) {
-        proxy.from = [proxy.from];
-    }
+const proxyMatchers = proxies
+    .map((proxy) => {
+        const hostnames = utils.ensureStrings(proxy.from);
+        const hostnameRegex = new RegExp(`(?<=\\.|^)(${hostnames.map(utils.escapeRegex).join("|")})$`, "iu");
 
-    if (typeof proxy.to !== "object" || Array.isArray(proxy.to)) {
-        proxy.to = {
-            "/": proxy.to,
-        };
-    }
-}
+        const routes = [];
+        if (typeof proxy.to === "object") {
+            if (Array.isArray(proxy.to)) {
+                routes.push(["", utils.ensureStrings(proxy.to)]);
+            } else {
+                for (const path in proxy.to) {
+                    routes.push([path, utils.ensureStrings(proxy.to[path])]);
+                }
+            }
+        } else {
+            routes.push(["", utils.ensureStrings(proxy.to)]);
+        }
+
+        const matchers = routes.map(([path, targets]) => {
+            const [discard, keep = ""] = path.split(/<\||\|>|<\|>/g, 2);
+            const pathRegex = new RegExp(`^${utils.escapeRegex(discard)}(?=${utils.escapeRegex(keep)}(\\/|$))`, "iu");
+
+            // Return matcher function
+            return (hostname, path) => {
+                if (!hostnameRegex.test(hostname)) return null;
+
+                const pathMatch = pathRegex.exec(path);
+                if (!pathMatch) return null;
+
+                return {
+                    path: pathMatch[0],
+                    targets: targets,
+                };
+            };
+        });
+
+        return matchers;
+    })
+    .flat();
 
 // Create proxy server
 const proxyServer = httpProxy.createProxyServer();
 
 module.exports = function (req, res, next) {
-    // Loop through each element in proxies-array
-    for (const proxy of proxies) {
-        // Proxy the request if the request hostname matches with any of the values in "from"
-        if (matcher.matchHostname(req.hostname, proxy.from, true) != null) {
-            // NOTE: Do not meddle with ``req.url`` (Causes problems with some middlewares on target servers)
-
-            const paths = Object.keys(proxy.to);
-            const matchedPath = matcher.matchPath(req.path, paths);
-            if (matchedPath == null) continue;
-
-            const match = proxy.to[matchedPath];
-            const targets = Array.isArray(match) ? match : [match];
-
-            return proxyServer.web(
-                req,
-                res,
-                {
-                    target: targets[Math.floor(Math.random() * targets.length)],
-                    selfHandleResponse: true,
-                },
-                (e) => {
-                    console.error("Could not proxy: " + e.code);
-                    res.status(503);
-                    res.render("error", {
-                        status: res.statusCode,
-                        title: "Service Unavailable.",
-                        message:
-                            "The server is temporarily unable to handle your request due to maintenance. Please try again later.",
-                    });
-                }
-            );
-        }
+    let match; // Find a matching proxy
+    for (const matcher of proxyMatchers) {
+        match = matcher(req.hostname, req.path);
+        if (match) break;
     }
 
-    next();
+    if (!match) {
+        return next();
+    }
+
+    const { path, targets } = match;
+    const target = targets[Math.floor(Math.random() * targets.length)];
+
+    console.log(req.url, req.url.substring(path.length));
+    req.url = req.url.substring(path.length);
+
+    return proxyServer.web(
+        req,
+        res,
+        {
+            target: target,
+            selfHandleResponse: true,
+        },
+        (e) => {
+            console.error("Could not proxy: " + e.code);
+            res.status(503);
+            res.render("error", {
+                status: res.statusCode,
+                title: "Service Unavailable.",
+                message:
+                    "The server is temporarily unable to handle your request due to maintenance. Please try again later.",
+            });
+        }
+    );
 };
 
 // Self handle proxy response to check status codes
@@ -80,8 +106,7 @@ proxyServer.on("proxyRes", function (proxyRes, req, res) {
             return res.render("error", {
                 status: res.statusCode,
                 title: "Not Found.",
-                message:
-                    "The page you were looking for could not be found. It might have been removed.",
+                message: "The page you were looking for could not be found. It might have been removed.",
             });
         }
         // If proxy response is JSON, parse and check if it contains a service error.
