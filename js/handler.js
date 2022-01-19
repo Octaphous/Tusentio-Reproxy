@@ -59,7 +59,6 @@ module.exports = function (req, res, next) {
     const { path, targets } = match;
     const target = targets[Math.floor(Math.random() * targets.length)];
 
-    console.log(req.url, req.url.substring(path.length));
     req.url = req.url.substring(path.length);
 
     return proxyServer.web(
