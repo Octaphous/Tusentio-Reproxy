@@ -13,8 +13,8 @@
         {
             "from": "sso.tusent.io",
             "to": {
-                "/api": "http://127.0.0.1:8081",
-                "/": "http://127.0.0.1:8080"
+                "|>/api": "http://127.0.0.1:8081",
+                "": "http://127.0.0.1:8080"
             },
             "sslDomain": "tusent.io"
         },
@@ -29,13 +29,11 @@
             "sslDomain": "tusent.io"
         },
         {
-            "from": "cms.tusent.io",
-            "to": "http://127.0.0.1:8084",
-            "sslDomain": "tusent.io"
-        },
-        {
             "from": "cloud.tusent.io",
-            "to": "http://127.0.0.1:8085",
+            "to": {
+                "/cms|>": "http://127.0.0.1:8084",
+                "": "http://127.0.0.1:8085"
+            },
             "sslDomain": "tusent.io"
         },
         {
